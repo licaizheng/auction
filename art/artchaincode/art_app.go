@@ -65,7 +65,7 @@ var recType = []string{"ARTINV", "USER", "BID", "AUCREQ", "POSTTRAN", "OPENAUC",
 // The following array holds the list of tables that should be created
 // The deploy/init deletes the tables and recreates them every time a deploy is invoked
 //////////////////////////////////////////////////////////////////////////////////////////////////
-var aucTables = []string{"UserTable", "UserCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
+var aucTables = []string{"UserTable", "DataTable","UserCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the Asset (Inventory)
@@ -129,16 +129,14 @@ type UserObject struct {
 	RoutingNo string
 }
 type DataObject struct {
-	UserID    string
+	CompanyID    string
 	RecType   string // Type = USER
-	Name      string
+	CompanyName      string
 	UserType  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
 	Address   string
 	Phone     string
 	Email     string
-	Bank      string
-	AccountNo string
-	RoutingNo string
+
 
 }
 /////////////////////////////////////////////////////////////////////////////
@@ -767,19 +765,19 @@ func CreateDataObject(args []string) (DataObject, error) {
 	var aData DataObject
 
 	// Check there are 10 Arguments
-	if len(args) != 4 {
+	if len(args) != 7 {
 		fmt.Println("CreateUserObject(): Incorrect number of arguments. Expecting 10 ")
-		return aData, errors.New("CreateUserObject() : Incorrect number of arguments. Expecting 10 ")
+		return aData, errors.New("CreateDataObject() : Incorrect number of arguments. Expecting 10 ")
 	}
 
 	// Validate UserID is an integer
 
 	_, err = strconv.Atoi(args[0])
 	if err != nil {
-		return aData, errors.New("CreateUserObject() : User ID should be an integer")
+		return aData, errors.New("CreateDataObject() : User ID should be an integer")
 	}
 
-	aData = DataObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]}
+	aData = DataObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6]}
 	fmt.Println("CreateUserObject() : User Object : ", aData)
 
 	return aData, nil
