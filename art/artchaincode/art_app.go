@@ -129,11 +129,16 @@ type UserObject struct {
 	RoutingNo string
 }
 type DataObject struct {
-	CompanyID    string
-	CompanyName    string
-	UserName    string // Type = USER
-	Age      string
-	PhoneNumber  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
+	UserID    string
+	RecType   string // Type = USER
+	Name      string
+	UserType  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
+	Address   string
+	Phone     string
+	Email     string
+	Bank      string
+	AccountNo string
+	RoutingNo string
 
 }
 /////////////////////////////////////////////////////////////////////////////
@@ -774,7 +779,7 @@ func CreateDataObject(args []string) (DataObject, error) {
 		return aData, errors.New("CreateUserObject() : User ID should be an integer")
 	}
 
-	aData = DataObject{args[0], args[1], args[2], args[3],args[4]}
+	aData = DataObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]}
 	fmt.Println("CreateUserObject() : User Object : ", aData)
 
 	return aData, nil
