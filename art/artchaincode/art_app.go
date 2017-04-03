@@ -128,7 +128,13 @@ type UserObject struct {
 	AccountNo string
 	RoutingNo string
 }
+type DataObject struct {
+	CompanyName    string
+	UserName    string // Type = USER
+	Age      string
+	PhoneNumber  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
 
+}
 /////////////////////////////////////////////////////////////////////////////
 // Register a request for participating in an auction
 // Usually posted by a seller who owns a piece of ITEM
@@ -210,6 +216,7 @@ type Bid struct {
 func GetNumberOfKeys(tname string) int {
 	TableMap := map[string]int{
 		"UserTable":        1,
+		"DataTable":        1,
 		"ItemTable":        1,
 		"UserCatTable":     3,
 		"ItemCatTable":     3,
@@ -233,6 +240,7 @@ func InvokeFunction(fname string) func(stub shim.ChaincodeStubInterface, functio
 	InvokeFunc := map[string]func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 		"PostItem":           PostItem,
 		"PostUser":           PostUser,
+		"PostData":           PostData,
 		"PostAuctionRequest": PostAuctionRequest,
 		"PostTransaction":    PostTransaction,
 		"PostBid":            PostBid,
@@ -252,6 +260,7 @@ func InvokeFunction(fname string) func(stub shim.ChaincodeStubInterface, functio
 func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	QueryFunc := map[string]func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 		"GetItem":               GetItem,
+		"GetData":               GetData,
 		"GetUser":               GetUser,
 		"GetAuctionRequest":     GetAuctionRequest,
 		"GetTransaction":        GetTransaction,
@@ -450,6 +459,30 @@ func GetVersion(stub shim.ChaincodeStubInterface, function string, args []string
 // ./peer chaincode query -l golang -n mycc -c '{"Function": "GetUser", "Args": ["100"]}'
 //
 //////////////////////////////////////////////////////////////////////////////////////////
+func GetData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	var err error
+
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "DataTable", args)
+	if err != nil {
+		fmt.Println("GetUser() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("GetData() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	fmt.Println("GetData() : Response : Successfull -")
+	return Avalbytes, nil
+}
+
+
+
 func GetUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
@@ -663,6 +696,56 @@ func GetTransaction(stub shim.ChaincodeStubInterface, function string, args []st
 // they provide or their participation on the auction blockchain, future enhancements will do that
 // ./peer chaincode invoke -l golang -n mycc -c '{"Function": "PostUser", "Args":["100", "USER", "Ashley Hart", "TRD",  "Morrisville Parkway, #216, Morrisville, NC 27560", "9198063535", "ashley@itpeople.com", "SUNTRUST", "00017102345", "0234678"]}'
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+func PostData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	drecord, err := CreateDataObject(args[0:]) //
+	if err != nil {
+		return nil, err
+	}
+	buff, err := DatatoJSON(drecord) //
+
+	if err != nil {
+		fmt.Println("PostuserObject() : Failed Cannot create object buffer for write : ", args[1])
+		return nil, errors.New("PostUser(): Failed Cannot create object buffer for write : " + args[1])
+	} else {
+		// Update the ledger with the Buffer Data
+		// err = stub.PutState(args[0], buff)
+		keys := []string{args[0]}
+		err = UpdateLedger(stub, "DataTable", keys, buff)
+		if err != nil {
+			fmt.Println("PostUser() : write error while inserting record")
+			return nil, err
+		}
+
+
+	}
+
+	return buff, err
+}
+
+func CreateDataObject(args []string) (DataObject, error) {
+
+	var err error
+	var aData DataObject
+
+	// Check there are 10 Arguments
+	if len(args) != 4 {
+		fmt.Println("CreateUserObject(): Incorrect number of arguments. Expecting 10 ")
+		return aData, errors.New("CreateUserObject() : Incorrect number of arguments. Expecting 10 ")
+	}
+
+	// Validate UserID is an integer
+
+	_, err = strconv.Atoi(args[0])
+	if err != nil {
+		return aData, errors.New("CreateUserObject() : User ID should be an integer")
+	}
+
+	aData = DataObject{args[0], args[1], args[2], args[3]}
+	fmt.Println("CreateUserObject() : User Object : ", aData)
+
+	return aData, nil
+}
 
 func PostUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
@@ -1813,7 +1896,16 @@ func UsertoJSON(user UserObject) ([]byte, error) {
 	fmt.Println("UsertoJSON created: ", ajson)
 	return ajson, nil
 }
+func DatatoJSON(user DataObject) ([]byte, error) {
 
+	ajson, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println("DatatoJSON error: ", err)
+		return nil, err
+	}
+	fmt.Println("DatatoJSON created: ", ajson)
+	return ajson, nil
+}
 //////////////////////////////////////////////////////////
 // Converts an User Object to a JSON String
 //////////////////////////////////////////////////////////
@@ -1828,7 +1920,17 @@ func JSONtoUser(user []byte) (UserObject, error) {
 	fmt.Println("JSONtoUser created: ", ur)
 	return ur, err
 }
+func JSONtoData(user []byte) (DataObject, error) {
 
+	ur := DataObject{}
+	err := json.Unmarshal(user, &ur)
+	if err != nil {
+		fmt.Println("JSONtoUser error: ", err)
+		return ur, err
+	}
+	fmt.Println("JSONtoUser created: ", ur)
+	return ur, err
+}
 //////////////////////////////////////////////////////////
 // Converts an Item Transaction to a JSON String
 //////////////////////////////////////////////////////////
