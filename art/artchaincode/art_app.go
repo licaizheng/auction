@@ -697,33 +697,65 @@ func GetTransaction(stub shim.ChaincodeStubInterface, function string, args []st
 // they provide or their participation on the auction blockchain, future enhancements will do that
 // ./peer chaincode invoke -l golang -n mycc -c '{"Function": "PostUser", "Args":["100", "USER", "Ashley Hart", "TRD",  "Morrisville Parkway, #216, Morrisville, NC 27560", "9198063535", "ashley@itpeople.com", "SUNTRUST", "00017102345", "0234678"]}'
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//func PostData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+//
+//	drecord, err := CreateDataObject(args[0:]) //
+//	if err != nil {
+//		return nil, err
+//	}
+//	buff, err := DatatoJSON(drecord) //
+//
+//	if err != nil {
+//		fmt.Println("PostuserObject() : Failed Cannot create object buffer for write : ", args[1])
+//		return nil, errors.New("PostUser(): Failed Cannot create object buffer for write : " + args[1])
+//	} else {
+//		// Update the ledger with the Buffer Data
+//		// err = stub.PutState(args[0], buff)
+//		keys := []string{args[0]}
+//		err = UpdateLedger(stub, "DataTable", keys, buff)
+//		if err != nil {
+//			fmt.Println("PostUser() : write error while inserting record")
+//			return nil, err
+//		}
+//
+//
+//	}
+//
+//	return buff, err
+//}
+
 func PostData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
-	drecord, err := CreateDataObject(args[0:]) //
+	record, err := CreateDataObject(args[0:]) //
 	if err != nil {
 		return nil, err
 	}
-	buff, err := DatatoJSON(drecord) //
+	buff, err := DatatoJSON(record) //
 
 	if err != nil {
 		fmt.Println("PostuserObject() : Failed Cannot create object buffer for write : ", args[1])
-		return nil, errors.New("PostUser(): Failed Cannot create object buffer for write : " + args[1])
+		return nil, errors.New("PostData(): Failed Cannot create object buffer for write : " + args[1])
 	} else {
 		// Update the ledger with the Buffer Data
 		// err = stub.PutState(args[0], buff)
 		keys := []string{args[0]}
 		err = UpdateLedger(stub, "DataTable", keys, buff)
 		if err != nil {
-			fmt.Println("PostUser() : write error while inserting record")
+			fmt.Println("PostDat() : write error while inserting record")
 			return nil, err
 		}
 
-
+		// Post Entry into UserCatTable - i.e. User Category Table
+		keys = []string{"2016", args[3], args[0]}
+		err = UpdateLedger(stub, "UserCatTable", keys, buff)
+		if err != nil {
+			fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
+			return nil, err
+		}
 	}
 
 	return buff, err
 }
-
 func CreateDataObject(args []string) (DataObject, error) {
 
 	var err error
