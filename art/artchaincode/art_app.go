@@ -829,7 +829,7 @@ func CreatePaperObject(args []string) (PaperObject, error) {
 	var aPaper PaperObject
 
 	// Check there are 10 Arguments
-	if len(args) != 7 {
+	if len(args) != 8 {
 		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 7 ")
 		return aPaper, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
 	}
