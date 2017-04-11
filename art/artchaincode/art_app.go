@@ -149,6 +149,7 @@ type PaperObject struct {
 	PaperID    string
 	RecType   string // Type = USER
 	Title      string
+	UserType  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
 	Author  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
 	years   string
 	citation     string
@@ -236,7 +237,7 @@ func GetNumberOfKeys(tname string) int {
 	TableMap := map[string]int{
 		"UserTable":        1,
 		"DataTable":        1,
-		"PaperTable":       2,
+		"PaperTable":       1,
 		"ItemTable":        1,
 		"UserCatTable":     3,
 		"ItemCatTable":     3,
@@ -804,20 +805,20 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 	} else {
 		// Update the ledger with the Buffer Data
 		// err = stub.PutState(args[0], buff)
-		keys := []string{args[0],args[2]}
+		keys := []string{args[0]}
 		err = UpdateLedger(stub, "PaperTable", keys, buff)
 		if err != nil {
 			fmt.Println("PostPaper() : write error while inserting record")
 			return nil, err
 		}
 
-		//// Post Entry into UserCatTable - i.e. User Category Table
-		//keys = []string{"2016", args[3], args[0]}
-		//err = UpdateLedger(stub, "UserCatTable", keys, buff)
-		//if err != nil {
-		//	fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
-		//	return nil, err
-		//}
+		// Post Entry into UserCatTable - i.e. User Category Table
+		keys = []string{"2016", args[3], args[0]}
+		err = UpdateLedger(stub, "UserCatTable", keys, buff)
+		if err != nil {
+			fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
+			return nil, err
+		}
 	}
 
 	return buff, err
@@ -825,25 +826,25 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 func CreatePaperObject(args []string) (PaperObject, error) {
 
 	var err error
-	var aData PaperObject
+	var aPaper PaperObject
 
 	// Check there are 10 Arguments
 	if len(args) != 7 {
 		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 7 ")
-		return aData, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
+		return aPaper, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
 	}
 
-	// Validate UserID is an integer
+	// Validate PaperID is an integer
 
 	_, err = strconv.Atoi(args[0])
 	if err != nil {
-		return aData, errors.New("CreatePaperObject() : Paper ID should be an integer")
+		return aPaper, errors.New("CreatePaperObject() : Paper ID should be an integer")
 	}
 
-	aData = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6]}
-	fmt.Println("CreatePaperObject() : Paper Object : ", aData)
+	aPaper = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6],args[7]}
+	fmt.Println("CreatePaperObject() : Paper Object : ", aPaper)
 
-	return aData, nil
+	return aPaper, nil
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create a User Object. The first step is to have users
