@@ -65,7 +65,7 @@ var recType = []string{"ARTINV", "USER", "BID", "AUCREQ", "POSTTRAN", "OPENAUC",
 // The following array holds the list of tables that should be created
 // The deploy/init deletes the tables and recreates them every time a deploy is invoked
 //////////////////////////////////////////////////////////////////////////////////////////////////
-var aucTables = []string{"UserTable", "DataTable","UserCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
+var aucTables = []string{"UserTable", "DataTable","PaperTable","UserCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the Asset (Inventory)
@@ -128,6 +128,9 @@ type UserObject struct {
 	AccountNo string
 	RoutingNo string
 }
+///////////////////////////////////////
+//数据交易的数据结构
+/////////////
 type DataObject struct {
 	CompanyID    string
 	RecType   string // Type = USER
@@ -138,6 +141,18 @@ type DataObject struct {
 	Email     string
 
 
+}
+///////////////////////////////////////
+//论文数据结构
+/////////////
+type PaperObject struct {
+	PaperID    string
+	RecType   string // Type = USER
+	Title      string
+	Author  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
+	years   string
+	citation     string
+	Email     string
 }
 /////////////////////////////////////////////////////////////////////////////
 // Register a request for participating in an auction
@@ -221,6 +236,7 @@ func GetNumberOfKeys(tname string) int {
 	TableMap := map[string]int{
 		"UserTable":        1,
 		"DataTable":        1,
+		"PaperTable":       2,
 		"ItemTable":        1,
 		"UserCatTable":     3,
 		"ItemCatTable":     3,
@@ -245,6 +261,7 @@ func InvokeFunction(fname string) func(stub shim.ChaincodeStubInterface, functio
 		"PostItem":           PostItem,
 		"PostUser":           PostUser,
 		"PostData":           PostData,
+		"PostPaper":          PostPaper,
 		"PostAuctionRequest": PostAuctionRequest,
 		"PostTransaction":    PostTransaction,
 		"PostBid":            PostBid,
@@ -265,6 +282,7 @@ func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function
 	QueryFunc := map[string]func(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error){
 		"GetItem":               GetItem,
 		"GetData":               GetData,
+		"GetPaper":              GetPaper,
 		"GetUser":               GetUser,
 		"GetAuctionRequest":     GetAuctionRequest,
 		"GetTransaction":        GetTransaction,
@@ -457,12 +475,7 @@ func GetVersion(stub shim.ChaincodeStubInterface, function string, args []string
 	return version, nil
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Retrieve User Information
-// example:
-// ./peer chaincode query -l golang -n mycc -c '{"Function": "GetUser", "Args": ["100"]}'
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+//查询交易数据集
 func GetData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
@@ -485,8 +498,34 @@ func GetData(stub shim.ChaincodeStubInterface, function string, args []string) (
 	return Avalbytes, nil
 }
 
+//查询论文数据集
+func GetPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
+	var err error
 
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "PaperTable", args)
+	if err != nil {
+		fmt.Println("GetPaper() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object Paper for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("GetPaper() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	fmt.Println("GetPaper() : Response : Successfull -")
+	return Avalbytes, nil
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+// Retrieve User Information
+// example:
+// ./peer chaincode query -l golang -n mycc -c '{"Function": "GetUser", "Args": ["100"]}'
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 func GetUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var err error
@@ -690,43 +729,11 @@ func GetTransaction(stub shim.ChaincodeStubInterface, function string, args []st
 	return Avalbytes, nil
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Create a User Object. The first step is to have users
-// registered
-// There are different types of users - Traders (TRD), Auction Houses (AH)
-// Shippers (SHP), Insurance Companies (INS), Banks (BNK)
-// While this version of the chain code does not enforce strict validation
-// the business process recomends validating each persona for the service
-// they provide or their participation on the auction blockchain, future enhancements will do that
-// ./peer chaincode invoke -l golang -n mycc -c '{"Function": "PostUser", "Args":["100", "USER", "Ashley Hart", "TRD",  "Morrisville Parkway, #216, Morrisville, NC 27560", "9198063535", "ashley@itpeople.com", "SUNTRUST", "00017102345", "0234678"]}'
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//func PostData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-//
-//	drecord, err := CreateDataObject(args[0:]) //
-//	if err != nil {
-//		return nil, err
-//	}
-//	buff, err := DatatoJSON(drecord) //
-//
-//	if err != nil {
-//		fmt.Println("PostuserObject() : Failed Cannot create object buffer for write : ", args[1])
-//		return nil, errors.New("PostUser(): Failed Cannot create object buffer for write : " + args[1])
-//	} else {
-//		// Update the ledger with the Buffer Data
-//		// err = stub.PutState(args[0], buff)
-//		keys := []string{args[0]}
-//		err = UpdateLedger(stub, "DataTable", keys, buff)
-//		if err != nil {
-//			fmt.Println("PostUser() : write error while inserting record")
-//			return nil, err
-//		}
-//
-//
-//	}
-//
-//	return buff, err
-//}
-
+//////////////////////////////////////////////////////*
+/*licaizheng
+数据交易部分的上传数据函数
+*/
+///////////////////////////////////
 func PostData(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	record, err := CreateDataObject(args[0:]) //
@@ -782,6 +789,72 @@ func CreateDataObject(args []string) (DataObject, error) {
 
 	return aData, nil
 }
+//发布论文数据
+func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	record, err := CreatePaperObject(args[0:]) //
+	if err != nil {
+		return nil, err
+	}
+	buff, err := PapertoJSON(record) //
+
+	if err != nil {
+		fmt.Println("PostPaperObject() : Failed Cannot create object buffer for write : ", args[1])
+		return nil, errors.New("PostPaper(): Failed Cannot create object buffer for write : " + args[1])
+	} else {
+		// Update the ledger with the Buffer Data
+		// err = stub.PutState(args[0], buff)
+		keys := []string{args[0],args[2]}
+		err = UpdateLedger(stub, "PaperTable", keys, buff)
+		if err != nil {
+			fmt.Println("PostPaper() : write error while inserting record")
+			return nil, err
+		}
+
+		//// Post Entry into UserCatTable - i.e. User Category Table
+		//keys = []string{"2016", args[3], args[0]}
+		//err = UpdateLedger(stub, "UserCatTable", keys, buff)
+		//if err != nil {
+		//	fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
+		//	return nil, err
+		//}
+	}
+
+	return buff, err
+}
+func CreatePaperObject(args []string) (PaperObject, error) {
+
+	var err error
+	var aData PaperObject
+
+	// Check there are 10 Arguments
+	if len(args) != 7 {
+		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 7 ")
+		return aData, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
+	}
+
+	// Validate UserID is an integer
+
+	_, err = strconv.Atoi(args[0])
+	if err != nil {
+		return aData, errors.New("CreatePaperObject() : Paper ID should be an integer")
+	}
+
+	aData = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6]}
+	fmt.Println("CreatePaperObject() : Paper Object : ", aData)
+
+	return aData, nil
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Create a User Object. The first step is to have users
+// registered
+// There are different types of users - Traders (TRD), Auction Houses (AH)
+// Shippers (SHP), Insurance Companies (INS), Banks (BNK)
+// While this version of the chain code does not enforce strict validation
+// the business process recomends validating each persona for the service
+// they provide or their participation on the auction blockchain, future enhancements will do that
+// ./peer chaincode invoke -l golang -n mycc -c '{"Function": "PostUser", "Args":["100", "USER", "Ashley Hart", "TRD",  "Morrisville Parkway, #216, Morrisville, NC 27560", "9198063535", "ashley@itpeople.com", "SUNTRUST", "00017102345", "0234678"]}'
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func PostUser(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
@@ -1940,6 +2013,16 @@ func DatatoJSON(user DataObject) ([]byte, error) {
 		return nil, err
 	}
 	fmt.Println("DatatoJSON created: ", ajson)
+	return ajson, nil
+}
+func PapertoJSON(user PaperObject) ([]byte, error) {
+
+	ajson, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println("PapertoJSON error: ", err)
+		return nil, err
+	}
+	fmt.Println("PapertoJSON created: ", ajson)
 	return ajson, nil
 }
 //////////////////////////////////////////////////////////
