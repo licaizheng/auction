@@ -813,12 +813,12 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		}
 
 		// Post Entry into UserCatTable - i.e. User Category Table
-		keys = []string{"2016", args[3], args[0]}
-		err = UpdateLedger(stub, "UserCatTable", keys, buff)
-		if err != nil {
-			fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
-			return nil, err
-		}
+		//keys = []string{"2016", args[2], args[0]}
+		//err = UpdateLedger(stub, "UserCatTable", keys, buff)
+		//if err != nil {
+		//	fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
+		//	return nil, err
+		//}
 	}
 
 	return buff, err
@@ -828,10 +828,10 @@ func CreatePaperObject(args []string) (PaperObject, error) {
 	//var err error
 	var aPaper PaperObject
 
-	// Check there are 10 Arguments
+	// Check there are 8 Arguments
 	if len(args) != 8 {
-		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 7 ")
-		return aPaper, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
+		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 8 ")
+		return aPaper, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 8 ")
 	}
 
 	// Validate PaperID is an integer
