@@ -324,10 +324,13 @@ func main() {
 	gopath = os.Getenv("GOPATH")
 	if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "DEV") {
 		fmt.Println("----------------- STARTED IN DEV MODE -------------------- ")
+		fmt.Println(gopath)
 		//set chaincode path for DEV MODE
 		ccPath = fmt.Sprintf("%s/src/github.com/hyperledger/fabric/auction/art/artchaincode/", gopath)
 	} else {
 		fmt.Println("----------------- STARTED IN NET MODE -------------------- ")
+		fmt.Println(gopath)
+		fmt.Println(os.Args)
 		//set chaincode path for NET MODE
 		ccPath = fmt.Sprintf("%s/src/github.com/ITPeople-Blockchain/auction/art/artchaincode/", gopath)
 	}
@@ -825,7 +828,7 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 }
 func CreatePaperObject(args []string) (PaperObject, error) {
 
-	var err error
+	//var err error
 	var aPaper PaperObject
 
 	// Check there are 10 Arguments
@@ -836,10 +839,10 @@ func CreatePaperObject(args []string) (PaperObject, error) {
 
 	// Validate PaperID is an integer
 
-	_, err = strconv.Atoi(args[0])
-	if err != nil {
-		return aPaper, errors.New("CreatePaperObject() : Paper ID should be an integer")
-	}
+	//_, err = strconv.Atoi(args[0])
+	//if err != nil {
+	//	return aPaper, errors.New("CreatePaperObject() : Paper ID should be an integer")
+	//}
 
 	aPaper = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6],args[7]}
 	fmt.Println("CreatePaperObject() : Paper Object : ", aPaper)
