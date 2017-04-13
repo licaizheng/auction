@@ -153,7 +153,7 @@ type PaperObject struct {
 	Author  string // Auction House (AH), Bank (BK), Buyer or Seller (TR), Shipper (SH), Appraiser (AP)
 	years   string
 	citation     string
-	Email     string
+
 }
 /////////////////////////////////////////////////////////////////////////////
 // Register a request for participating in an auction
@@ -816,12 +816,12 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		}
 
 		// Post Entry into UserCatTable - i.e. User Category Table
-		keys = []string{"2016", args[3], args[0]}
-		err = UpdateLedger(stub, "UserCatTable", keys, buff)
-		if err != nil {
-			fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
-			return nil, err
-		}
+		//keys = []string{"2016", args[3], args[0]}
+		//err = UpdateLedger(stub, "UserCatTable", keys, buff)
+		//if err != nil {
+		//	fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
+		//	return nil, err
+		//}
 	}
 
 	return buff, err
@@ -832,7 +832,7 @@ func CreatePaperObject(args []string) (PaperObject, error) {
 	var aPaper PaperObject
 
 	// Check there are 10 Arguments
-	if len(args) != 8 {
+	if len(args) != 7 {
 		fmt.Println("CreatePaperObject(): Incorrect number of arguments. Expecting 7 ")
 		return aPaper, errors.New("CreatePaperObject() : Incorrect number of arguments. Expecting 7 ")
 	}
@@ -844,7 +844,7 @@ func CreatePaperObject(args []string) (PaperObject, error) {
 	//	return aPaper, errors.New("CreatePaperObject() : Paper ID should be an integer")
 	//}
 
-	aPaper = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6],args[7]}
+	aPaper = PaperObject{args[0], args[1], args[2], args[3], args[4], args[5], args[6]}
 	fmt.Println("CreatePaperObject() : Paper Object : ", aPaper)
 
 	return aPaper, nil
