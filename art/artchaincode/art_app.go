@@ -65,7 +65,7 @@ var recType = []string{"ARTINV", "USER", "BID", "AUCREQ", "POSTTRAN", "OPENAUC",
 // The following array holds the list of tables that should be created
 // The deploy/init deletes the tables and recreates them every time a deploy is invoked
 //////////////////////////////////////////////////////////////////////////////////////////////////
-var aucTables = []string{"UserTable", "DataTable","PaperTable","UserCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
+var aucTables = []string{"UserTable", "DataTable","PaperTable","UserCatTable","PaperCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the Asset (Inventory)
@@ -240,6 +240,7 @@ func GetNumberOfKeys(tname string) int {
 		"PaperTable":       1,
 		"ItemTable":        1,
 		"UserCatTable":     3,
+		"PaperCatTable":     3,
 		"ItemCatTable":     3,
 		"AuctionTable":     1,
 		"AucInitTable":     2,
@@ -295,6 +296,7 @@ func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function
 		"GetItemLog":            GetItemLog,
 		"GetItemListByCat":      GetItemListByCat,
 		"GetUserListByCat":      GetUserListByCat,
+		"GetPaperListByCat":     GetPaperListByCat,
 		"GetListOfInitAucs":     GetListOfInitAucs,
 		"GetListOfOpenAucs":     GetListOfOpenAucs,
 		"ValidateItemOwnership": ValidateItemOwnership,
@@ -813,12 +815,12 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		}
 
 		// Post Entry into UserCatTable - i.e. User Category Table
-		//keys = []string{"2016", args[2], args[0]}
-		//err = UpdateLedger(stub, "UserCatTable", keys, buff)
-		//if err != nil {
-		//	fmt.Println("PostData() : write error while inserting recordinto UserCatTable \n")
-		//	return nil, err
-		//}
+		keys = []string{"2016", args[2], args[0]}
+		err = UpdateLedger(stub, "PaperCatTable", keys, buff)
+		if err != nil {
+			fmt.Println("PostPaper() : write error while inserting recordinto UserCatTable \n")
+			return nil, err
+		}
 	}
 
 	return buff, err
@@ -2586,7 +2588,40 @@ func GetUserListByCat(stub shim.ChaincodeStubInterface, function string, args []
 	return jsonRows, nil
 
 }
+func GetPaperListByCat(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
+	// Check there are 1 Arguments provided as per the the struct - two are computed
+	// See example
+	if len(args) < 1 {
+		fmt.Println("GetPaperListByCat(): Incorrect number of arguments. Expecting 1 ")
+		fmt.Println("GetPaperListByCat(): ./peer chaincode query -l golang -n mycc -c '{\"Function\": \"GetUserListByCat\", \"Args\": [\"AH\"]}'")
+		return nil, errors.New("CreatepaperObject(): Incorrect number of arguments. Expecting 1 ")
+	}
+
+	rows, err := GetList(stub, "PaperCatTable", args)
+	if err != nil {
+		return nil, fmt.Errorf("GetPaperListByCat() operation failed. Error marshaling JSON: %s", err)
+	}
+
+	nCol := GetNumberOfKeys("PaperCatTable")
+
+	tlist := make([]UserObject, len(rows))
+	for i := 0; i < len(rows); i++ {
+		ts := rows[i].Columns[nCol].GetBytes()
+		uo, err := JSONtoUser(ts)
+		if err != nil {
+			fmt.Println("GetPaperListByCat() Failed : Ummarshall error")
+			return nil, fmt.Errorf("GetPaperListByCat() operation failed. %s", err)
+		}
+		tlist[i] = uo
+	}
+
+	jsonRows, _ := json.Marshal(tlist)
+
+	//fmt.Println("All Users : ", jsonRows)
+	return jsonRows, nil
+
+}
 ////////////////////////////////////////////////////////////////////////////
 // Get a List of Rows based on query criteria from the OBC
 //
