@@ -519,7 +519,7 @@ func GetPaper(stub shim.ChaincodeStubInterface, function string, args []string) 
 		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
 		return nil, errors.New(jsonResp)
 	}
-
+	//ajson :=PapertoJSON(Avalbytes)
 	fmt.Println("GetPaper() : Response : Successfull -")
 	return Avalbytes, nil
 }
@@ -2354,7 +2354,7 @@ func QueryLedger(stub shim.ChaincodeStubInterface, tableName string, args []stri
 	//jsonResp := "{\"Owner\":\"" + string(row.Columns[nCol].GetBytes()) + "\"}"
 	//fmt.Println("User Query Response:%s\n", jsonResp)
 	Avalbytes := row.Columns[nCol].GetBytes()
-
+	fmt.Println(Avalbytes,"Avalbytes")
 	// Perform Any additional processing of data
 	fmt.Println("QueryLedger() : Successful - Proceeding to ProcessRequestType ")
 	err = ProcessQueryResult(stub, Avalbytes, args)
@@ -2588,6 +2588,7 @@ func GetUserListByCat(stub shim.ChaincodeStubInterface, function string, args []
 	return jsonRows, nil
 
 }
+//返回所有的文章
 func GetPaperListByCat(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	// Check there are 1 Arguments provided as per the the struct - two are computed
@@ -2617,6 +2618,10 @@ func GetPaperListByCat(stub shim.ChaincodeStubInterface, function string, args [
 	}
 
 	jsonRows, _ := json.Marshal(tlist)
+
+	//a []string
+	//a=[hello world]
+	//strings.Fields(a)
 
 	//fmt.Println("All Users : ", jsonRows)
 	return jsonRows, nil
