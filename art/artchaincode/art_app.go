@@ -59,13 +59,13 @@ import (
 // which used a record type field. The array below holds a list of valid record types.
 // This could be stored on a blockchain table or an application
 //////////////////////////////////////////////////////////////////////////////////////////////////
-var recType = []string{"ARTINV", "USER", "BID", "AUCREQ", "POSTTRAN", "OPENAUC", "CLAUC", "XFER", "VERIFY"}
+var recType = []string{"ARTINV", "USER", "PAPER","BID", "AUCREQ", "POSTTRAN", "OPENAUC", "CLAUC", "XFER", "VERIFY"}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // The following array holds the list of tables that should be created
 // The deploy/init deletes the tables and recreates them every time a deploy is invoked
 //////////////////////////////////////////////////////////////////////////////////////////////////
-var aucTables = []string{"UserTable", "DataTable","PaperTable","UserCatTable","PaperCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
+var aucTables = []string{"UserTable", "DataTable","PaperTable","InvertedIndex","UserCatTable","PaperCatTable", "ItemTable", "ItemCatTable", "ItemHistoryTable", "AuctionTable", "AucInitTable", "AucOpenTable", "BidTable", "TransTable"}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // This creates a record of the Asset (Inventory)
@@ -239,6 +239,7 @@ func GetNumberOfKeys(tname string) int {
 		"DataTable":        1,
 		"PaperTable":       1,
 		"ItemTable":        1,
+		"InvertedIndex":   1,
 		"UserCatTable":     3,
 		"PaperCatTable":     3,
 		"ItemCatTable":     3,
@@ -286,6 +287,7 @@ func QueryFunction(fname string) func(stub shim.ChaincodeStubInterface, function
 		"GetData":               GetData,
 		"GetPaper":              GetPaper,
 		"GetUser":               GetUser,
+		"GetPaperList":          GetPaperList,
 		"GetAuctionRequest":     GetAuctionRequest,
 		"GetTransaction":        GetTransaction,
 		"GetBid":                GetBid,
@@ -521,6 +523,30 @@ func GetPaper(stub shim.ChaincodeStubInterface, function string, args []string) 
 	}
 	//ajson :=PapertoJSON(Avalbytes)
 	fmt.Println("GetPaper() : Response : Successfull -")
+	return Avalbytes, nil
+}
+
+
+//mohuchaxun
+func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+	var err error
+
+	// Get the Object and Display it
+	Avalbytes, err := QueryLedger(stub, "InvertedIndex", args)
+	if err != nil {
+		fmt.Println("InvertedIndex() : Failed to Query Object ")
+		jsonResp := "{\"Error\":\"Failed to get  Object InvertedIndex for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	if Avalbytes == nil {
+		fmt.Println("InvertedIndex() : Incomplete Query Object ")
+		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+	//ajson :=PapertoJSON(Avalbytes)
+	fmt.Println("InvertedIndex() : Response : Successfull -")
 	return Avalbytes, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -794,9 +820,45 @@ func CreateDataObject(args []string) (DataObject, error) {
 }
 //发布论文数据
 func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-
+	var title_a [] string
 	record, err := CreatePaperObject(args[0:]) //
-	//s1:=strings.Fields(args[2])
+	title:=strings.Fields(args[2])
+	for _,x:= range title {
+
+		// Get the Objects and Display it
+		title_a[0]=x
+		Avalbytes, errr := QueryLedger(stub, "InvertedIndex", title_a)
+		if Avalbytes == nil {
+			keys := []string{title_a[0]}
+			data2 := []byte(args[2])
+			fmt.Println("InvertedIndex()if ",keys)
+			fmt.Println("InvertedIndex() ",data2)
+			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
+			if err != nil {
+				fmt.Println("InvertedIndex() : write error while inserting record")
+				return nil, err
+			}
+		}else {
+			result  := string(Avalbytes)
+			result +=","
+			result +=string(args[2])
+			keys := []string{title_a[0]}
+			data2 := []byte(result)
+			fmt.Println("InvertedIndex()if ",keys)
+			fmt.Println("InvertedIndex() ",data2)
+			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
+			if err != nil {
+				fmt.Println("InvertedIndex() : write error while inserting record")
+				return nil, err
+			}
+
+		}
+		if errr != nil {
+			fmt.Println("GetTransaction() : Failed to Query Object ")
+			jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+			return nil, errors.New(jsonResp)
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -2043,6 +2105,18 @@ func JSONtoUser(user []byte) (UserObject, error) {
 	fmt.Println("JSONtoUser created: ", ur)
 	return ur, err
 }
+
+func JSONtoPaper(paper []byte) (PaperObject, error) {
+
+	ur := PaperObject{}
+	err := json.Unmarshal(paper, &ur)
+	if err != nil {
+		fmt.Println("JSONtoPaper error: ", err)
+		return ur, err
+	}
+	fmt.Println("JSONtoPaper created: ", ur)
+	return ur, err
+}
 func JSONtoData(user []byte) (DataObject, error) {
 
 	ur := DataObject{}
@@ -2607,10 +2681,10 @@ func GetPaperListByCat(stub shim.ChaincodeStubInterface, function string, args [
 
 	nCol := GetNumberOfKeys("PaperCatTable")
 
-	tlist := make([]UserObject, len(rows))
+	tlist := make([]PaperObject, len(rows))
 	for i := 0; i < len(rows); i++ {
 		ts := rows[i].Columns[nCol].GetBytes()
-		uo, err := JSONtoUser(ts)
+		uo, err := JSONtoPaper(ts)
 		if err != nil {
 			fmt.Println("GetPaperListByCat() Failed : Ummarshall error")
 			return nil, fmt.Errorf("GetPaperListByCat() operation failed. %s", err)
