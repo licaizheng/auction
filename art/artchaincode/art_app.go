@@ -796,7 +796,7 @@ func CreateDataObject(args []string) (DataObject, error) {
 func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	record, err := CreatePaperObject(args[0:]) //
-	s1:=strings.Fields(args[2])
+	//s1:=strings.Fields(args[2])
 	if err != nil {
 		return nil, err
 	}
