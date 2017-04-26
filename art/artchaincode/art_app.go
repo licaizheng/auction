@@ -822,8 +822,8 @@ func CreateDataObject(args []string) (DataObject, error) {
 func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	title_a := []string{}
 	record, err := CreatePaperObject(args[0:]) //
-	title:=strings.Fields(args[2])
-	for _,x:= range title {
+	title_a=strings.Fields(args[2])
+	for _,x:= range title_a {
 
 		// Get the Objects and Display it
 		title_a[0]=x
