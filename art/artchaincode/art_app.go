@@ -547,6 +547,7 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 	}
 	//ajson :=PapertoJSON(Avalbytes)
 	fmt.Println("InvertedIndex() : Response : Successfull -")
+	fmt.Println("Avalbytes",Avalbytes)
 	return Avalbytes, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -829,12 +830,12 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		title_a[0]=x
 		key := []string{title_a[0]}
 		fmt.Println("title_a[0] ",title_a[0])
-		Avalbytes, errr := QueryLedger(stub, "InvertedIndex", key)
+		Avalbytes, _ := QueryLedger(stub, "InvertedIndex", key)
 		if Avalbytes == nil {
 			keys := []string{title_a[0]}
 			data2 := []byte(args[2])
 			fmt.Println("InvertedIndex()if ",keys)
-			fmt.Println("InvertedIndex() ",data2)
+			fmt.Println("InvertedIndex() if",data2)
 			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
 			if err != nil {
 				fmt.Println("InvertedIndex() : write error while inserting record")
@@ -846,24 +847,24 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 			result +=string(args[2])
 			keys := []string{title_a[0]}
 			data2 := []byte(result)
-			fmt.Println("InvertedIndex()if ",keys)
-			fmt.Println("InvertedIndex() ",data2)
+			fmt.Println("InvertedIndex()else ",keys)
+			fmt.Println("InvertedIndex()else ",data2)
 			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
 			if err != nil {
-				fmt.Println("InvertedIndex() : write error while inserting record")
+				fmt.Println("InvertedIndexelse() : write error while inserting record")
 				return nil, err
 			}
 
 		}
-		if errr != nil {
-			fmt.Println("GetTransaction() : Failed to Query Object ")
-			jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
-			return nil, errors.New(jsonResp)
-		}
+		//if errr != nil {
+		//	fmt.Println("GetTransaction() : Failed to Query Object ")
+		//	jsonResp := "{\"Error\":\"Failed to get  Object Data for " + args[0] + "\"}"
+		//	return nil, errors.New(jsonResp)
+		//}
 	}
-	if err != nil {
-		return nil, err
-	}
+	//if err != nil {
+	//	return nil, err
+	//}
 	buff, err := PapertoJSON(record) //
 
 	if err != nil {
