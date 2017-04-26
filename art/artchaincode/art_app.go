@@ -820,13 +820,14 @@ func CreateDataObject(args []string) (DataObject, error) {
 }
 //发布论文数据
 func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	var title_a [] string
+	title_a := []string{}
 	record, err := CreatePaperObject(args[0:]) //
 	title:=strings.Fields(args[2])
 	for _,x:= range title {
 
 		// Get the Objects and Display it
 		title_a[0]=x
+		fmt.Println("title_a[0] ",title_a[0])
 		Avalbytes, errr := QueryLedger(stub, "InvertedIndex", title_a)
 		if Avalbytes == nil {
 			keys := []string{title_a[0]}
