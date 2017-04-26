@@ -827,8 +827,9 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 
 		// Get the Objects and Display it
 		title_a[0]=x
+		key := []string{title_a[0]}
 		fmt.Println("title_a[0] ",title_a[0])
-		Avalbytes, errr := QueryLedger(stub, "InvertedIndex", title_a)
+		Avalbytes, errr := QueryLedger(stub, "InvertedIndex", key)
 		if Avalbytes == nil {
 			keys := []string{title_a[0]}
 			data2 := []byte(args[2])
