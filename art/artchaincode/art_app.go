@@ -857,14 +857,17 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 				return nil, err
 			}
 		}else {
-			result  := string(Avalbytes)
-			result +=","
-			result +=string(args[2])
+
+			io, err := JSONtoInvert(Avalbytes)
+
+			io.Title +=","
+			io.Title  +=string(args[2])
 			keys := []string{title_a[0]}
 			//data2 := []byte(result)
-			aData := InvertedObject{title_a[0],"PAPER",result}
+
+			aData := InvertedObject{title_a[0],"PAPER",io.Title}
 			ajson, err := InverttoJSON(aData) //
-			fmt.Println("else result ",result)
+			fmt.Println("else result ",io.Title)
 			fmt.Println("else ajson",ajson)
 			err = UpdateLedger(stub, "InvertedIndex", keys, ajson)
 			if err != nil {
@@ -2139,6 +2142,18 @@ func JSONtoUser(user []byte) (UserObject, error) {
 func JSONtoPaper(paper []byte) (PaperObject, error) {
 
 	ur := PaperObject{}
+	err := json.Unmarshal(paper, &ur)
+	if err != nil {
+		fmt.Println("JSONtoPaper error: ", err)
+		return ur, err
+	}
+	fmt.Println("JSONtoPaper created: ", ur)
+	return ur, err
+}
+
+func JSONtoInvert(paper []byte) (InvertedObject, error) {
+
+	ur := InvertedObject{}
 	err := json.Unmarshal(paper, &ur)
 	if err != nil {
 		fmt.Println("JSONtoPaper error: ", err)
