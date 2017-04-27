@@ -860,7 +860,7 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 
 			io, err := JSONtoInvert(Avalbytes)
 
-			io.Title +=","
+			io.Title +=" tttt "
 			io.Title  +=string(args[2])
 			keys := []string{title_a[0]}
 			//data2 := []byte(result)
@@ -869,8 +869,10 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 			ajson, err := InverttoJSON(aData) //
 			fmt.Println("else result ",io.Title)
 			fmt.Println("else ajson",ajson)
+			fmt.Println("else ajson",aData)
 			err = UpdateLedger(stub, "InvertedIndex", keys, ajson)
 			if err != nil {
+				fmt.Println("err",err)
 				fmt.Println("InvertedIndexelse() : write error while inserting record")
 				return nil, err
 			}
