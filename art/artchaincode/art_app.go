@@ -870,7 +870,7 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 			fmt.Println("else result ",io.Title)
 			fmt.Println("else ajson",ajson)
 			fmt.Println("else ajson",aData)
-			err = UpdateLedger(stub, "InvertedIndex", keys, ajson)
+			err = myUpdateLedger(stub, "InvertedIndex", keys, ajson)
 			if err != nil {
 				fmt.Println("err",err)
 				fmt.Println("InvertedIndexelse() : write error while inserting record")
@@ -2378,6 +2378,36 @@ func UpdateLedger(stub shim.ChaincodeStubInterface, tableName string, keys []str
 
 	row := shim.Row{columns}
 	ok, err := stub.InsertRow(tableName, row)
+	if err != nil {
+		return fmt.Errorf("UpdateLedger: InsertRow into "+tableName+" Table operation failed. %s", err)
+	}
+	if !ok {
+		return errors.New("UpdateLedger: InsertRow into " + tableName + " Table failed. Row with given key " + keys[0] + " already exists")
+	}
+
+	fmt.Println("UpdateLedger: InsertRow into ", tableName, " Table operation Successful. ")
+	return nil
+}
+
+func myUpdateLedger(stub shim.ChaincodeStubInterface, tableName string, keys []string, args []byte) error {
+
+	nKeys := GetNumberOfKeys(tableName)
+	if nKeys < 1 {
+		fmt.Println("Atleast 1 Key must be provided \n")
+	}
+
+	var columns []*shim.Column
+
+	for i := 0; i < nKeys; i++ {
+		col := shim.Column{Value: &shim.Column_String_{String_: keys[i]}}
+		columns = append(columns, &col)
+	}
+
+	lastCol := shim.Column{Value: &shim.Column_Bytes{Bytes: []byte(args)}}
+	columns = append(columns, &lastCol)
+
+	row := shim.Row{columns}
+	ok, err := stub.ReplaceRow(tableName, row)
 	if err != nil {
 		return fmt.Errorf("UpdateLedger: InsertRow into "+tableName+" Table operation failed. %s", err)
 	}
