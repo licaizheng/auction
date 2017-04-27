@@ -155,6 +155,15 @@ type PaperObject struct {
 	citation     string
 	Email     string
 }
+///////////////////////////////////////
+//论文数据结构
+/////////////
+type InvertedObject struct {
+	PaperID    string
+	RecType   string // Type = USER
+	Title      string
+
+}
 /////////////////////////////////////////////////////////////////////////////
 // Register a request for participating in an auction
 // Usually posted by a seller who owns a piece of ITEM
@@ -527,11 +536,14 @@ func GetPaper(stub shim.ChaincodeStubInterface, function string, args []string) 
 }
 
 
-//mohuchaxun
+//模糊查询的列表返回
 func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-
+	//title_a := []string{}
 	var err error
-
+	//title_a=strings.Fields(args[0])
+	//for _,x:= range title_a {
+	//
+	//}
 	// Get the Object and Display it
 	Avalbytes, err := QueryLedger(stub, "InvertedIndex", args)
 	if err != nil {
@@ -834,9 +846,11 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		if Avalbytes == nil {
 			keys := []string{title_a[0]}
 			data2 := []byte(args[2])
+			aData := InvertedObject{title_a[0],"PAPER",args[2]}
+			ajson, err := InverttoJSON(aData) //
 			fmt.Println("InvertedIndex()if ",keys)
 			fmt.Println("InvertedIndex() if",data2)
-			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
+			err = UpdateLedger(stub, "InvertedIndex", keys, ajson)
 			if err != nil {
 				fmt.Println("InvertedIndex() : write error while inserting record")
 				return nil, err
@@ -847,9 +861,11 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 			result +=string(args[2])
 			keys := []string{title_a[0]}
 			data2 := []byte(result)
-			fmt.Println("InvertedIndex()else ",keys)
-			fmt.Println("InvertedIndex()else ",data2)
-			err = UpdateLedger(stub, "InvertedIndex", keys, data2)
+			aData := InvertedObject{title_a[0],"PAPER",args[2]}
+			ajson, err := InverttoJSON(aData) //
+			fmt.Println("InvertedIndex()if ",keys)
+			fmt.Println("InvertedIndex() if",data2)
+			err = UpdateLedger(stub, "InvertedIndex", keys, ajson)
 			if err != nil {
 				fmt.Println("InvertedIndexelse() : write error while inserting record")
 				return nil, err
@@ -2092,6 +2108,16 @@ func PapertoJSON(user PaperObject) ([]byte, error) {
 		return nil, err
 	}
 	fmt.Println("PapertoJSON created: ", ajson)
+	return ajson, nil
+}
+func InverttoJSON(user InvertedObject) ([]byte, error) {
+
+	ajson, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println("InvertedObject error: ", err)
+		return nil, err
+	}
+	fmt.Println("InvertedObject created: ", ajson)
 	return ajson, nil
 }
 //////////////////////////////////////////////////////////
