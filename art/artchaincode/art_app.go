@@ -2409,13 +2409,13 @@ func myUpdateLedger(stub shim.ChaincodeStubInterface, tableName string, keys []s
 	row := shim.Row{columns}
 	ok, err := stub.ReplaceRow(tableName, row)
 	if err != nil {
-		return fmt.Errorf("UpdateLedger: InsertRow into "+tableName+" Table operation failed. %s", err)
+		return fmt.Errorf("myUpdateLedger: ReplaceRow into "+tableName+" Table operation failed. %s", err)
 	}
 	if !ok {
-		return errors.New("UpdateLedger: InsertRow into " + tableName + " Table failed. Row with given key " + keys[0] + " already exists")
+		return errors.New("myUpdateLedger: ReplaceRow into " + tableName + " Table failed. Row with given key " + keys[0] + " already exists")
 	}
 
-	fmt.Println("UpdateLedger: InsertRow into ", tableName, " Table operation Successful. ")
+	fmt.Println("myUpdateLedger: ReplaceRow into ", tableName, " Table operation Successful. ")
 	return nil
 }
 
