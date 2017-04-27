@@ -834,6 +834,7 @@ func CreateDataObject(args []string) (DataObject, error) {
 //发布论文数据
 func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	title_a := []string{}
+	Avalbytes:=[]byte{}
 	record, err := CreatePaperObject(args[0:]) //
 	title_a=strings.Fields(args[2])
 	for _,x:= range title_a {
@@ -842,7 +843,7 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 		title_a[0]=x
 		key := []string{title_a[0]}
 		fmt.Println("title_a[0] ",title_a[0])
-		Avalbytes, _ := QueryLedger(stub, "InvertedIndex", key)
+		Avalbytes, _ = QueryLedger(stub, "InvertedIndex", key)
 		if Avalbytes == nil {
 			keys := []string{title_a[0]}
 			data2 := []byte(args[2])
@@ -2461,7 +2462,7 @@ func QueryLedger(stub shim.ChaincodeStubInterface, tableName string, args []stri
 	fmt.Println(Avalbytes,"Avalbytes")
 	// Perform Any additional processing of data
 	fmt.Println("QueryLedger() : Successful - Proceeding to ProcessRequestType ")
-	err = ProcessQueryResult(stub, Avalbytes, args)
+	//err = ProcessQueryResult(stub, Avalbytes, args)
 	if err != nil {
 		fmt.Println("QueryLedger() : Cannot create object  : ", args[1])
 		jsonResp := "{\"QueryLedger() Error\":\" Cannot create Object for key " + args[0] + "\"}"
