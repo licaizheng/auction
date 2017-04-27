@@ -535,31 +535,119 @@ func GetPaper(stub shim.ChaincodeStubInterface, function string, args []string) 
 	return Avalbytes, nil
 }
 
+//模糊查询中，倒排索引匹配的问题
+type Node struct{
+	value string
+	cnt int
+}
+func NewNode(v string,c int) *Node{
+	return &Node{
+		value: v,
+		cnt: c,
+	}
+}
+func topKFrequent(nums []string, k int) []string {
+	arrlen := len(nums)   //数组长度
+	hash := make(map[string]int)
+	//fmt.Println(hash) //
+	for i := 0; i < arrlen; i++{
+		hash[nums[i]] += 1
+		//fmt.Println("hash",hash[nums[i]] )
+	}
+	heap := make([]*Node,k+1)
+	for i := 0; i < k + 1; i++{
+		heap[i] = NewNode("0",0)
+	}
+	for key,v := range hash {
+		if v < heap[1].cnt{
+			fmt.Println("heap[1].cnt",heap[1].cnt )
+			fmt.Println("v",v )
+			continue
+		}
+		heap[1] = NewNode(key,v)
+		shif_down(heap,1,k)
+	}
+	arr := make([]string,k)
+	cnt := k -1
+	for ;cnt >= 0; cnt--{
+		arr[cnt] = heap[1].value
+		heap[1] = heap[k]
+		k--
+		shif_down(heap,1,k)
+	}
+	return arr
+}
+func shif_down(A []*Node,s int, end int){
+	i := s
+	j := 2 * s;
+	for j <= end {
+		if j < end && A[j].cnt > A[j+1].cnt {
+			j++
+		}
+		if(A[i].cnt <= A[j].cnt){
+			break
+		}
+		A[i],A[j] = A[j],A[i]
+		i = j
+		j = 2 * j
+	}
+}
+
 
 //模糊查询的列表返回
 func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	//title_a := []string{}
-	var err error
-	//title_a=strings.Fields(args[0])
-	//for _,x:= range title_a {
-	//
-	//}
-	// Get the Object and Display it
-	Avalbytes, err := QueryLedger(stub, "InvertedIndex", args)
-	if err != nil {
-		fmt.Println("InvertedIndex() : Failed to Query Object ")
-		jsonResp := "{\"Error\":\"Failed to get  Object InvertedIndex for " + args[0] + "\"}"
-		return nil, errors.New(jsonResp)
-	}
+	title_a := []string{}
+	title_b := []string{}
+	title_c := []string{}
 
-	if Avalbytes == nil {
-		fmt.Println("InvertedIndex() : Incomplete Query Object ")
-		jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
-		return nil, errors.New(jsonResp)
+	title_a=strings.Fields(args[0])
+	for i,x:= range title_a {
+		title_a[0]=x;
+		// Get the Object and Display it
+		Avalbytes, err := QueryLedger(stub, "InvertedIndex", title_a)
+		if err != nil {
+			fmt.Println("InvertedIndex() : Failed to Query Object ")
+			jsonResp := "{\"Error\":\"Failed to get  Object InvertedIndex for " + title_a[0] + "\"}"
+			return nil, errors.New(jsonResp)
+		}
+
+		if Avalbytes == nil {
+			fmt.Println("InvertedIndex() : Incomplete Query Object ")
+			jsonResp := "{\"Error\":\"Incomplete information about the key for " + title_a[0] + "\"}"
+			return nil, errors.New(jsonResp)
+		}
+		title_b[0]=string(Avalbytes)
+		if i<(len(title_a)-1) {
+			title_b[0]+=","
+		}
+
 	}
-	//ajson :=PapertoJSON(Avalbytes)
-	fmt.Println("InvertedIndex() : Response : Successfull -")
+	fmt.Println("title_b[0]",title_b[0])
+	title_c=strings.Split(title_b[0], ",")
+	fmt.Println("title_c",title_c)
+	in,_:=strconv.Atoi(args[1])
+	fmt.Println("in",in)
+	result:=topKFrequent(title_c, in)
+	fmt.Println("result",result)
+	stringByte := "\x00" + strings.Join(result, "\x20\x00")
+	Avalbytes:=[]byte(stringByte)
 	fmt.Println("Avalbytes",Avalbytes)
+	//// Get the Object and Display it
+	//Avalbytes, err := QueryLedger(stub, "InvertedIndex", args)
+	//if err != nil {
+	//	fmt.Println("InvertedIndex() : Failed to Query Object ")
+	//	jsonResp := "{\"Error\":\"Failed to get  Object InvertedIndex for " + args[0] + "\"}"
+	//	return nil, errors.New(jsonResp)
+	//}
+	//
+	//if Avalbytes == nil {
+	//	fmt.Println("InvertedIndex() : Incomplete Query Object ")
+	//	jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
+	//	return nil, errors.New(jsonResp)
+	//}
+	////ajson :=PapertoJSON(Avalbytes)
+	//fmt.Println("InvertedIndex() : Response : Successfull -")
+	//fmt.Println("Avalbytes",Avalbytes)
 	return Avalbytes, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -860,7 +948,7 @@ func PostPaper(stub shim.ChaincodeStubInterface, function string, args []string)
 
 			io, err := JSONtoInvert(Avalbytes)
 
-			io.Title +=" tttt "
+			io.Title +=","
 			io.Title  +=string(args[2])
 			keys := []string{title_a[0]}
 			//data2 := []byte(result)
