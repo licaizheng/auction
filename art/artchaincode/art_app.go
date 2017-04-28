@@ -598,7 +598,7 @@ func shif_down(A []*Node,s int, end int){
 //模糊查询的列表返回
 func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	title_a := []string{}
-	title_b := []string{}
+	title_b := [1]string{}
 	title_c := []string{}
 
 	title_a=strings.Fields(args[0])
