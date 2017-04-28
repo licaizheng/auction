@@ -590,6 +590,7 @@ func shif_down(A []*Node,s int, end int){
 		A[i],A[j] = A[j],A[i]
 		i = j
 		j = 2 * j
+
 	}
 }
 
@@ -632,22 +633,7 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 	stringByte := "\x00" + strings.Join(result, "\x20\x00")
 	Avalbytes:=[]byte(stringByte)
 	fmt.Println("Avalbytes",Avalbytes)
-	//// Get the Object and Display it
-	//Avalbytes, err := QueryLedger(stub, "InvertedIndex", args)
-	//if err != nil {
-	//	fmt.Println("InvertedIndex() : Failed to Query Object ")
-	//	jsonResp := "{\"Error\":\"Failed to get  Object InvertedIndex for " + args[0] + "\"}"
-	//	return nil, errors.New(jsonResp)
-	//}
-	//
-	//if Avalbytes == nil {
-	//	fmt.Println("InvertedIndex() : Incomplete Query Object ")
-	//	jsonResp := "{\"Error\":\"Incomplete information about the key for " + args[0] + "\"}"
-	//	return nil, errors.New(jsonResp)
-	//}
-	////ajson :=PapertoJSON(Avalbytes)
-	//fmt.Println("InvertedIndex() : Response : Successfull -")
-	//fmt.Println("Avalbytes",Avalbytes)
+
 	return Avalbytes, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
