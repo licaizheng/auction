@@ -52,7 +52,7 @@ import (
 	"time"
 	// "github.com/errorpkg"
 )
-
+var paper_title map[string]interface{}
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // The recType is a mandatory attribute. The original app was written with a single table
 // in mind. The only way to know how to process a record was the 70's style 80 column punch card
@@ -625,13 +625,20 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 
 	}
 	fmt.Println("title_b[0]",title_b[0])
+	json.Unmarshal([]byte(title_b[0]), &paper_title)
 	title_c=strings.Split(title_b[0], ",")
-	fmt.Println("title_c",title_c)
+	fmt.Println("paper_title==",paper_title)
+	title := paper_title["Title"]
+
+	var titl string
+	titl =title.(string)
+	title_c=strings.Split(titl, ",")
+	fmt.Println("title_c==",title_c)
 	in,_:=strconv.Atoi(args[1])
 	fmt.Println("in",in)
 	result:=topKFrequent(title_c, in)
 	fmt.Println("result",result)
-	stringByte := "\x00" + strings.Join(result, "\x20\x00")
+	stringByte :=  strings.Join(result, "\x20\x00")
 	Avalbytes:=[]byte(stringByte)
 	fmt.Println("Avalbytes",Avalbytes)
 
