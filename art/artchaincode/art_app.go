@@ -617,6 +617,7 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 			jsonResp := "{\"Error\":\"Incomplete information about the key for " + title_a[0] + "\"}"
 			return nil, errors.New(jsonResp)
 		}
+		fmt.Println("InvertedIndex() : Incomplete Query Object ",string(Avalbytes))
 		title_b[0]=string(Avalbytes)
 		if i<(len(title_a)-1) {
 			title_b[0]+=","
