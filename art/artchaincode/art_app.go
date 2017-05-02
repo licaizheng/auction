@@ -569,8 +569,16 @@ func topKFrequent(nums []string, k int) []string {
 	}
 	arr := make([]string,k)
 	cnt := k -1
+	cn := k -1
 	for ;cnt >= 0; cnt--{
-		arr[cnt] = heap[1].value
+		if cnt <cn {
+			arr[cnt] = heap[1].value+","
+
+		}else {
+
+			arr[cnt] = heap[1].value
+		}
+
 		heap[1] = heap[k]
 		k--
 		shif_down(heap,1,k)
@@ -632,17 +640,20 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 
 	var titl string
 	titl =title.(string)
+	fmt.Println("titl==",titl)
 	title_c=strings.Split(titl, ",")
 	fmt.Println("title_c==",title_c)
+	fmt.Println("len(title_c)==",len(title_c))
 	in,_:=strconv.Atoi(args[1])
 	fmt.Println("in",in)
 	result:=topKFrequent(title_c, in)
 	fmt.Println("result",result)
+	jsonRows, _ := json.Marshal(result)
 	stringByte :=  strings.Join(result, "\x20\x00")
 	Avalbytes:=[]byte(stringByte)
 	fmt.Println("Avalbytes",Avalbytes)
-
-	return Avalbytes, nil
+	fmt.Println("jsonRows",jsonRows)
+	return jsonRows, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 // Retrieve User Information
