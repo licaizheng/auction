@@ -661,7 +661,7 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 	fmt.Println("Avalbytes",Avalbytes)
 	fmt.Println("jsonRows",jsonRows)
 	fmt.Println("stringByte",stringByte)
-	return Avalbytes, nil
+	return jsonRows, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 // Retrieve User Information
