@@ -629,9 +629,9 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 		}
 		fmt.Println("InvertedIndex() : Incomplete Query Object ",string(Avalbytes))
 		if i< j{
-			title_b[0]=string(Avalbytes)+","
+			title_b[0]+=string(Avalbytes)+","
 		}else {
-			title_b[0]=string(Avalbytes)
+			title_b[0]+=string(Avalbytes)
 		}
 
 		if i<(len(title_a)-1) {
