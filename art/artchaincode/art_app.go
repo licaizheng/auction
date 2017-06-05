@@ -604,7 +604,7 @@ func shif_down(A []*Node,s int, end int){
 
 
 //模糊查询的列表返回
-func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) (string, error) {
+func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	title_a := []string{}
 	title_b := [1]string{}
 	title_c := []string{}
@@ -661,7 +661,7 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 	fmt.Println("Avalbytes",Avalbytes)
 	fmt.Println("jsonRows",jsonRows)
 	fmt.Println("stringByte",stringByte)
-	return stringByte, nil
+	return Avalbytes, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 // Retrieve User Information
