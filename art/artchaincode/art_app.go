@@ -604,15 +604,17 @@ func shif_down(A []*Node,s int, end int){
 
 
 //模糊查询的列表返回
-func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) (string, error) {
 	title_a := []string{}
 	title_b := [1]string{}
 	title_c := []string{}
 
 	title_a=strings.Fields(args[0])
+	j:=len(title_a)
 	for i,x:= range title_a {
 		title_a[0]=x;
 		// Get the Object and Display it
+		fmt.Println("title_a[0]",title_a[0])
 		Avalbytes, err := QueryLedger(stub, "InvertedIndex", title_a)
 		if err != nil {
 			fmt.Println("InvertedIndex() : Failed to Query Object ")
@@ -626,7 +628,12 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 			return nil, errors.New(jsonResp)
 		}
 		fmt.Println("InvertedIndex() : Incomplete Query Object ",string(Avalbytes))
-		title_b[0]=string(Avalbytes)
+		if i< j{
+			title_b[0]=string(Avalbytes)+","
+		}else {
+			title_b[0]=string(Avalbytes)
+		}
+
 		if i<(len(title_a)-1) {
 			title_b[0]+=","
 		}
@@ -653,7 +660,8 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 	Avalbytes:=[]byte(stringByte)
 	fmt.Println("Avalbytes",Avalbytes)
 	fmt.Println("jsonRows",jsonRows)
-	return jsonRows, nil
+	fmt.Println("stringByte",stringByte)
+	return stringByte, nil
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 // Retrieve User Information
