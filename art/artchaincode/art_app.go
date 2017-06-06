@@ -606,11 +606,11 @@ func shif_down(A []*Node,s int, end int){
 //模糊查询的列表返回
 func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	title_a := []string{}
-	title_b := [1]string{}
+	title_b := [100]string{}
 	title_c := []string{}
 
 	title_a=strings.Fields(args[0])
-	j:=len(title_a)
+	//j:=len(title_a)
 	for i,x:= range title_a {
 		title_a[0]=x;
 		// Get the Object and Display it
@@ -628,25 +628,34 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 			return nil, errors.New(jsonResp)
 		}
 		fmt.Println("InvertedIndex() : Incomplete Query Object ",string(Avalbytes))
-		if i< j{
-			title_b[0]+=string(Avalbytes)+","
+		if i<(len(title_a)-1) {
+			title_b[i]=string(Avalbytes)+","
 		}else {
-			title_b[0]+=string(Avalbytes)
+			title_b[i]=string(Avalbytes)
 		}
 
-		if i<(len(title_a)-1) {
-			title_b[0]+=","
-		}
+		//if i<(len(title_a)-1) {
+		//	title_b[i]+=","
+		//}
 
 	}
-	fmt.Println("title_b[0]",title_b[0])
-	json.Unmarshal([]byte(title_b[0]), &paper_title)
-	title_c=strings.Split(title_b[0], ",")
-	fmt.Println("paper_title==",paper_title)
-	title := paper_title["Title"]
-
 	var titl string
-	titl =title.(string)
+	for i,_:= range title_a {
+		fmt.Println("title_b[0]", title_b[i])
+
+		json.Unmarshal([]byte(title_b[i]), &paper_title)
+		//title_c = strings.Split(title_b[0], ",")
+		fmt.Println("paper_title==", paper_title)
+		title := paper_title["Title"]
+		if i<(len(title_a)-1) {
+			titl =title.(string)+","
+		}else {
+			titl =title.(string)
+		}
+
+
+	}
+
 	fmt.Println("titl==",titl)
 	title_c=strings.Split(titl, ",")
 	fmt.Println("title_c==",title_c)
