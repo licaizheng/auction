@@ -648,9 +648,9 @@ func GetPaperList(stub shim.ChaincodeStubInterface, function string, args []stri
 		fmt.Println("paper_title==", paper_title)
 		title := paper_title["Title"]
 		if i<(len(title_a)-1) {
-			titl =title.(string)+","
+			titl =titl+title.(string)+","
 		}else {
-			titl =title.(string)
+			titl =titl+title.(string)
 		}
 
 
